@@ -15,7 +15,10 @@
   "autoload": {
     "psr-4": {
       "Jxm\\Tool\\": "src/"
-    }
+    },
+    "files": [
+      "Jxm\\Tool\\CommonClass\\CommonFunc.php"
+    ]
   },
   "extra": {
     "laravel": {
