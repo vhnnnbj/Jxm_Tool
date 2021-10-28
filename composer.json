@@ -17,7 +17,7 @@
       "Jxm\\Tool\\": "src/"
     },
     "files": [
-      "Jxm\\Tool\\CommonClass\\CommonFunc.php"
+      "src\\CommonClass\\CommonFunc.php"
     ]
   },
   "extra": {
