@@ -20,7 +20,7 @@
   "extra": {
     "laravel": {
       "providers": [
-        "Jxm\\Tool\\EhrServiceProvider"
+        "Jxm\\Tool\\ToolServiceProvider"
       ]
     }
   }
