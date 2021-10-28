@@ -1,0 +1,27 @@
+{
+  "name": "jxm/tool",
+  "description": "tools",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "csf",
+      "email": "chenshifang@jiuxunmu.com"
+    }
+  ],
+  "require": {
+    "php": "^7.4|^8.0",
+    "laravel/framework": ">=6.20"
+  },
+  "autoload": {
+    "psr-4": {
+      "Jxm\\Tool\\": "src/"
+    }
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "Jxm\\Tool\\EhrServiceProvider"
+      ]
+    }
+  }
+}
