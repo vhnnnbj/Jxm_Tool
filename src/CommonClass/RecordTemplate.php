@@ -7,6 +7,7 @@ namespace Jxm\Tool\CommonClass;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Auth;
 
 trait RecordTemplate
 {
@@ -41,7 +42,7 @@ trait RecordTemplate
             'subtype' => $subtype,
             'state' => $state,
             'describe' => $describe,
-            'editor_id' => $editor_id,
+            'editor_id' => $editor_id ?: (Auth::user() ? Auth::user()->id : 1),
             'param' => is_array($param) ? json_encode($param) : $param,
             'val_num' => $val_num,
             'val_str' => $val_str,
