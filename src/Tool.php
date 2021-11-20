@@ -36,14 +36,13 @@ class Tool
                 'msg' => '操作成功',
             ];
         }
-//        if (Str::startsWith($request->path(), 'api')) {
         if (Arr::has($result, 'code')) {
             $code = $result['code'];
+        } else {
+            $result['code'] = 0;
+            $code = 0;
         }
         return self::commonDataInput($code, $result, $type, Arr::has($result, 'msg') ? $result['msg'] : $msg);
-//        } else {
-//            return json_encode($result);
-//        }
     }
 
 
