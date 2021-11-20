@@ -165,6 +165,22 @@ function DatetimeFormat($datetime)
 }
 
 /**
+ * Notes: 身份证号隐藏
+ * User: harden
+ * Date: 2020/10/16
+ * Time:16:55
+ * @param string $identity
+ * @return string
+ */
+function hideIdentity(string $identity)
+{
+    if (strlen($identity) > 7)
+        return Str::substr($identity, 0, 5) . '****' . Str::substr($identity, Str::length($identity) - 6);
+    else
+        return $identity;
+}
+
+/**
  * Notes: 手机号隐藏
  * User: harden
  * Date: 2020/10/16
