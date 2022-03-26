@@ -13,6 +13,14 @@ trait RecordTemplate
 {
     use SoftDeletes;
 
+    /**
+     * Notes: 为数组 / JSON 序列化准备日期。
+     */
+    protected function serializeDate(\DateTimeInterface $date)
+    {
+        return $date->format($this->dateFormat ?: 'Y-m-d H:i:s');
+    }
+
     public function model(): MorphTo
     {
         return $this->morphTo();
