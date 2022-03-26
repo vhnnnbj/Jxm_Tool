@@ -33,6 +33,14 @@ function routeModuleHelper(string $module, string $controller, $type = 1)
                 break;
             }
         }
+    } elseif ($type == 3) {
+        $files = scandir(base_path() . '/Modules/' . $module . '/Http/Controllers/App');
+        foreach ($files as $file) {
+            if (strtolower($file) == (strtolower($controller) . 'controller.php')) {
+                $class = 'Modules\\' . $module . '\\Http\\Controllers\\App\\' . $file;
+                break;
+            }
+        }
     } else {
         abort(404);
     }
