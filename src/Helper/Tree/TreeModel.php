@@ -31,6 +31,12 @@ trait TreeModel
         return $this[$this->key_parent] == 0;
     }
 
+    public static function checkTop($model_id)
+    {
+        $model = static::whereId($model_id)->first();
+        return $model->isTop();
+    }
+
     /**
      * Notes: 获取子类型汇总id
      * User: harden - 2021/9/28 下午2:15
@@ -46,10 +52,23 @@ trait TreeModel
         $allIds = [$this->id];
         do {
             $newAllIds = $allIds;
-            $subDepartments = $allTrees->whereIn('parent_id', $allIds)->pluck('id');
+            $subDepartments = $allTrees->whereIn($this->key_parent, $allIds)->pluck('id');
             $allIds = array_unique(array_merge($newAllIds, $subDepartments->toArray()));
         } while (sizeof($newAllIds) != sizeof($allIds));
         return $allIds;
+    }
+
+    /**
+     * Notes: static获取子类型汇总id
+     * User: harden - 2021/9/28 下午2:15
+     * @param null $allTrees
+     * @param null $field
+     * @return array
+     */
+    public static function getAllSubIds($model_id, $allTrees = null)
+    {
+        $model = static::whereId($model_id)->first();
+        return $model->getAllChildrenIds($allTrees);
     }
 
     /**
@@ -59,7 +78,7 @@ trait TreeModel
      * @param null $field
      * @return array
      */
-    public function getUpGrades($allTrees = null, $field = null)
+    public function getUpGrades($allTrees = null)
     {
         if (is_null($allTrees)) {
             $allTrees = static::get(['id', $this->key_parent]);
@@ -72,6 +91,19 @@ trait TreeModel
             $allIds->add($node->id);
         }
         return $allIds->unique()->toArray();
+    }
+
+    /**
+     * Notes: 获取上级部门id
+     * User: harden - 2021/9/28 下午2:15
+     * @param null $allTrees
+     * @param null $field
+     * @return array
+     */
+    public function getAllUpGrades($model_id, $allTrees = null)
+    {
+        $model = static::whereId($model_id)->first();
+        return $model->getUpGrades($allTrees);
     }
 
     /**
@@ -91,9 +123,51 @@ trait TreeModel
         }
         return $node;
     }
+
+    /**
+     * Notes: 获取所属公司
+     * User: harden - 2021/9/28 下午2:15
+     * @param null $allTrees
+     * @param null $field
+     * @return mixed
+     */
+    public function getTopModel($model_id, $allTrees = null)
+    {
+        $model = static::whereId($model_id)->first();
+        return $model->getTope($allTrees);
+    }
     #endregion
 
     #region static Functions
+    public static function dealTrees($allModels, $node_id = null)
+    {
+        $tmp = new static();
+        if ($node_id) {
+            $tree = $allModels->where('id', $node_id)->first();
+            $children = $allModels->where($tmp->key_parent, $node_id);
+            $result = [];
+            foreach ($children as $child) {
+                $result[] = self::dealTrees($allModels, $child->id);
+            }
+            $tree->children = $result;
+            return $tree;
+        } else {
+//            $trees = new Collection();
+            $tops = $allModels->whereNotIn($tmp->key_parent, $allModels->pluck('id'))
+                ->values();
+            $tops->transform(function ($item) use ($allModels, $tmp) {
+                $result = [];
+                $children = $allModels->where($tmp->key_parent, $item->id);
+                foreach ($children as $child) {
+                    $result[] = self::dealTrees($allModels, $child->id);
+                }
+                $item->children = $result;
+                return $item;
+            });
+            return $tops;
+        }
+    }
+
     public static function RedisKey_All(): string
     {
         throw new \Exception('Undefined Info Key', 503);
@@ -109,8 +183,8 @@ trait TreeModel
         return self::getAllInfoToRedis(self::RedisKey_All());
     }
 
-    protected static function getAllInfoToRedis($keyName, $relations = [], $relation_keys = [], $withCounts = [],
-                                                $time = 2 * 3600, $deal_call = null)
+    public static function getAllInfoToRedis($keyName, $relations = [], $relation_keys = [], $withCounts = [],
+                                             $time = 2 * 3600, $deal_call = null)
     {
         $infos = Redis::get($keyName);
         if (!$infos) {
