@@ -168,9 +168,9 @@ trait TreeModel
         }
     }
 
-    public static function RedisKey_All(): string
+    public static function RedisKey_All()
     {
-        throw new \Exception('Undefined Info Key', 503);
+        return null;
     }
 
     public static function RedisKey_Simple(): string
@@ -186,13 +186,16 @@ trait TreeModel
     public static function getAllInfoToRedis($keyName, $relations = [], $relation_keys = [], $withCounts = [],
                                              $time = 2 * 3600, $deal_call = null)
     {
-        $infos = Redis::get($keyName);
+        $infos = null;
+        if ($keyName)
+            $infos = Redis::get($keyName);
         if (!$infos) {
             $infos = self::with($relations)->withCount($withCounts)->get();
             if ($deal_call) {
                 $deal_call($infos);
             }
-            Redis::setex($keyName, 2 * 3600, json_encode($infos->toArray()));
+            if ($keyName)
+                Redis::setex($keyName, 2 * 3600, json_encode($infos->toArray()));
         } else {
             $cached_infos = json_decode($infos, true);
             $infos = new Collection();
