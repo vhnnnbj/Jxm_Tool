@@ -212,9 +212,9 @@ function hidePhoneNumber(string $phone)
  * @param string $wxid
  * @return string
  */
-function hideWxid(string $wxid)
+function hideWxid(string $wxid, $check = false)
 {
-    if (!preg_match('/^[-_a-zA-Z0-9]{6,20}$/', $wxid)) {
+    if ($check && !preg_match('/^[-_a-zA-Z0-9]{6,20}$/', $wxid)) {
         return '微信号格式错误:' . $wxid;
     }
     if (strlen($wxid) > 5)
