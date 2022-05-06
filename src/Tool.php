@@ -38,9 +38,6 @@ class Tool
         }
         if (Arr::has($result, 'code')) {
             $code = $result['code'];
-        } else {
-            $result['code'] = 0;
-            $code = 0;
         }
         return self::commonDataInput($code, $result, $type, Arr::has($result, 'msg') ? $result['msg'] : $msg);
     }
