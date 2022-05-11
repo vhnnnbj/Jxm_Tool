@@ -100,7 +100,7 @@ trait TreeModel
      * @param null $field
      * @return array
      */
-    public function getAllUpGrades($model_id, $allTrees = null)
+    public static function getAllUpGrades($model_id, $allTrees = null)
     {
         $model = static::whereId($model_id)->first();
         return $model->getUpGrades($allTrees);
@@ -121,7 +121,7 @@ trait TreeModel
         while ($node[$this->key_parent] != 0 && $node[$this->key_parent] != $node->id) {
             $node = $allTrees->where('id', $node[$this->key_parent])->first();
         }
-        return $node;
+        return static::find($node->id);
     }
 
     /**
