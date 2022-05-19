@@ -115,13 +115,16 @@ trait TreeModel
      */
     public function getTop($allTrees = null)
     {
-        if (is_null($allTrees))
+        $use_static = false;
+        if (is_null($allTrees)) {
             $allTrees = static::get(['id', $this->key_name, $this->key_parent]);
+            $use_static = true;
+        }
         $node = $allTrees->where('id', $this->id)->first();
         while ($node[$this->key_parent] != 0 && $node[$this->key_parent] != $node->id) {
             $node = $allTrees->where('id', $node[$this->key_parent])->first();
         }
-        return static::find($node->id);
+        return $use_static ? (static::find($node->id)) : $allTrees->where('id', $node->id)->first();
     }
 
     /**
@@ -134,7 +137,7 @@ trait TreeModel
     public function getTopModel($model_id, $allTrees = null)
     {
         $model = static::whereId($model_id)->first();
-        return $model->getTope($allTrees);
+        return $model->getTop($allTrees);
     }
     #endregion
 
