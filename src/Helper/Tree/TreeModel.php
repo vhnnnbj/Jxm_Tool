@@ -134,7 +134,7 @@ trait TreeModel
      * @param null $field
      * @return mixed
      */
-    public function getTopModel($model_id, $allTrees = null)
+    public static function getTopModel($model_id, $allTrees = null)
     {
         $model = static::whereId($model_id)->first();
         return $model->getTop($allTrees);
