@@ -4,6 +4,7 @@ namespace Jxm\Tool\Helper\Tree;
 
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Redis;
 
@@ -48,12 +49,25 @@ trait TreeModel
     {
         if (is_null($allTrees)) {
             $allTrees = static::get(['id', $this->key_parent]);
+            $allNodes = [];
+            foreach ($allTrees as $tree) {
+                $allNodes[$tree->id] = $tree;
+            }
+        } elseif ($allTrees instanceof Collection) {
+            $allNodes = [];
+            foreach ($allTrees as $node) {
+                $allNodes[$node->id] = $node;
+            }
+        } else {
+            $allNodes = $allTrees;
         }
         $allIds = [$this->id];
         do {
             $newAllIds = $allIds;
-            $subDepartments = $allTrees->whereIn($this->key_parent, $allIds)->pluck('id');
-            $allIds = array_unique(array_merge($newAllIds, $subDepartments->toArray()));
+            $subDepartments = Arr::pluck(Arr::where($allNodes, function ($q) use ($allIds) {
+                return in_array($q[$this->key_parent], $allIds);
+            }), 'id');
+            $allIds = array_unique(array_merge($newAllIds, $subDepartments));
         } while (sizeof($newAllIds) != sizeof($allIds));
         return $allIds;
     }
@@ -82,15 +96,26 @@ trait TreeModel
     {
         if (is_null($allTrees)) {
             $allTrees = static::get(['id', $this->key_parent]);
+            $allNodes = [];
+            foreach ($allTrees as $node) {
+                $allNodes[$node->id] = $node;
+            }
+        } elseif ($allTrees instanceof Collection) {
+            $allNodes = [];
+            foreach ($allTrees as $node) {
+                $allNodes[$node->id] = $node;
+            }
+        } else {
+            $allNodes = $allTrees;
         }
-        $allIds = new Collection();
-        $node = $allTrees->where('id', $this->id)->first();
-        $allIds->add($this->id);
-        while ($node[$this->key_parent] != 0) {
-            $node = $allTrees->where('id', $node[$this->key_parent])->first();
-            $allIds->add($node->id);
+        $allIds = [];
+        $node = $allNodes[$this->id];
+        $allIds[] = $this->id;
+        while ($node[$this->key_parent] != 0 && $node[$this->key_parent] != $node['id']) {
+            $node = $allNodes[$node[$this->key_parent]];
+            $allIds[] = $node->id;
         }
-        return $allIds->unique()->toArray();
+        return $allIds;
     }
 
     /**
@@ -118,13 +143,25 @@ trait TreeModel
         $use_static = false;
         if (is_null($allTrees)) {
             $allTrees = static::get(['id', $this->key_name, $this->key_parent]);
+            $allNodes = [];
+            foreach ($allTrees as $node) {
+                $allNodes[$node->id] = $node;
+            }
             $use_static = true;
+        } elseif ($allTrees instanceof Collection) {
+            $allNodes = [];
+            foreach ($allTrees as $node) {
+                $allNodes[$node->id] = $node;
+            }
+        } else {
+            $allNodes = $allTrees;
         }
-        $node = $allTrees->where('id', $this->id)->first();
+        $node = $allNodes[$this->id];
         while ($node[$this->key_parent] != 0 && $node[$this->key_parent] != $node->id) {
-            $node = $allTrees->where('id', $node[$this->key_parent])->first();
+            $node = $allNodes[$node[$this->key_parent]];
         }
-        return $use_static ? (static::find($node->id)) : $allTrees->where('id', $node->id)->first();
+        return $use_static ? (static::find($node->id)) : (($allTrees instanceof Collection) ? $allTrees->where('id', $node->id)->first() :
+            $allTrees[$node->id]);
     }
 
     /**
@@ -187,7 +224,7 @@ trait TreeModel
     }
 
     public static function getAllInfoToRedis($keyName, $relations = [], $relation_keys = [], $withCounts = [],
-                                             $time = 2 * 3600, $deal_call = null)
+                                             $time = 2 * 3600, $deal_call = null): Collection
     {
         $infos = null;
         if ($keyName)
@@ -216,6 +253,18 @@ trait TreeModel
             }
         }
         return $infos;
+    }
+
+    public static function getAllArrayInfoToRedis($keyName, $relations = [], $relation_keys = [], $withCounts = [],
+                                                  $time = 2 * 3600, $deal_call = null): array
+    {
+        $infos = self::getAllInfoToRedis($keyName, $relations = [], $relation_keys = [], $withCounts = [],
+            $time = 2 * 3600, $deal_call = null);
+        $array = [];
+        foreach ($infos as $info) {
+            $array[$info['id']] = $info;
+        }
+        return $array;
     }
 
     public static function clearCache()
