@@ -54,10 +54,7 @@ trait TreeModel
                 $allNodes[$tree->id] = $tree;
             }
         } elseif ($allTrees instanceof Collection) {
-            $allNodes = [];
-            foreach ($allTrees as $node) {
-                $allNodes[$node->id] = $node;
-            }
+            $allNodes = array_column($allTrees->toArray(), null, 'id');
         } else {
             $allNodes = $allTrees;
         }
@@ -101,10 +98,7 @@ trait TreeModel
                 $allNodes[$node->id] = $node;
             }
         } elseif ($allTrees instanceof Collection) {
-            $allNodes = [];
-            foreach ($allTrees as $node) {
-                $allNodes[$node->id] = $node;
-            }
+            $allNodes = array_column($allTrees->toArray(), null, 'id');
         } else {
             $allNodes = $allTrees;
         }
@@ -149,10 +143,7 @@ trait TreeModel
             }
             $use_static = true;
         } elseif ($allTrees instanceof Collection) {
-            $allNodes = [];
-            foreach ($allTrees as $node) {
-                $allNodes[$node->id] = $node;
-            }
+            $allNodes = array_column($allTrees->toArray(), null, 'id');
         } else {
             $allNodes = $allTrees;
         }
@@ -260,10 +251,7 @@ trait TreeModel
     {
         $infos = self::getAllInfoToRedis($keyName, $relations = [], $relation_keys = [], $withCounts = [],
             $time = 2 * 3600, $deal_call = null);
-        $array = [];
-        foreach ($infos as $info) {
-            $array[$info['id']] = $info;
-        }
+        $array = array_column($infos->toArray(), null, 'id');
         return $array;
     }
 
