@@ -107,7 +107,7 @@ trait TreeModel
         $allIds[] = $this->id;
         while ($node[$this->key_parent] != 0 && $node[$this->key_parent] != $node['id']) {
             $node = $allNodes[$node[$this->key_parent]];
-            $allIds[] = $node->id;
+            $allIds[] = $node['id'];
         }
         return $allIds;
     }
