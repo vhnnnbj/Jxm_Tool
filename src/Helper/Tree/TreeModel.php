@@ -199,6 +199,29 @@ trait TreeModel
         }
     }
 
+    public static function dealArrayTrees(array $allNodes, int $node_id = null)
+    {
+        $tmp = new static();
+        foreach ($allNodes as $key => $node) {
+            $allNodes[$key]['children'] = [];
+        }
+        $done = [];
+        do {
+            $leafs = Arr::where($allNodes, function ($item) use ($allNodes, $tmp, $done) {
+                return !in_array($item['id'], Arr::pluck($allNodes, $tmp->key_parent)) &&
+                    !in_array($item['id'], $done);
+            });
+            foreach ($leafs as $leaf) {
+                if ($leaf[$tmp->key_parent] != 0 && $leaf[$tmp->key_parent] != $leaf['id']) {
+                    $allNodes[$leaf[$tmp->key_parent]]['children'][] = $leaf;
+                    unset($allNodes[$leaf['id']]);
+                }
+                $done[] = $leaf['id'];
+            }
+        } while ($leafs);
+        return array_values($allNodes);
+    }
+
     public static function RedisKey_All()
     {
         return null;
