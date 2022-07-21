@@ -35,6 +35,7 @@ trait TreeModel
     public static function checkTop($model_id)
     {
         $model = static::whereId($model_id)->first();
+        if (!$model) return false;
         return $model->isTop();
     }
 
@@ -79,6 +80,7 @@ trait TreeModel
     public static function getAllSubIds($model_id, $allTrees = null)
     {
         $model = static::whereId($model_id)->first();
+        if (!$model) return [];
         return $model->getAllChildrenIds($allTrees);
     }
 
@@ -122,6 +124,7 @@ trait TreeModel
     public static function getAllUpGrades($model_id, $allTrees = null)
     {
         $model = static::whereId($model_id)->first();
+        if (!$model) return [];
         return $model->getUpGrades($allTrees);
     }
 
@@ -165,6 +168,7 @@ trait TreeModel
     public static function getTopModel($model_id, $allTrees = null)
     {
         $model = static::whereId($model_id)->first();
+        if (!$model) return null;
         return $model->getTop($allTrees);
     }
     #endregion
