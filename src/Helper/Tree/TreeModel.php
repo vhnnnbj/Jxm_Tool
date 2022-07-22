@@ -203,9 +203,12 @@ trait TreeModel
         }
     }
 
-    public static function dealArrayTrees(array $allNodes, int $node_id = null)
+    public static function dealArrayTrees(array|null $allNodes = null, int $node_id = null)
     {
         $tmp = new static();
+        if (is_null($allNodes)) {
+            $allNodes = self::getAllArrayInfoToRedis(self::RedisKey_All());
+        }
         foreach ($allNodes as $key => $node) {
             $allNodes[$key]['children'] = [];
         }
