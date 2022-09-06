@@ -50,10 +50,7 @@ trait TreeModel
     {
         if (is_null($allTrees)) {
             $allTrees = static::get(['id', $this->key_parent]);
-            $allNodes = [];
-            foreach ($allTrees as $tree) {
-                $allNodes[$tree->id] = $tree;
-            }
+            $allNodes = array_column($allTrees->toArray(), null, 'id');
         } elseif ($allTrees instanceof Collection) {
             $allNodes = array_column($allTrees->toArray(), null, 'id');
         } else {
@@ -95,10 +92,7 @@ trait TreeModel
     {
         if (is_null($allTrees)) {
             $allTrees = static::get(['id', $this->key_parent]);
-            $allNodes = [];
-            foreach ($allTrees as $node) {
-                $allNodes[$node->id] = $node;
-            }
+            $allNodes = array_column($allTrees->toArray(), null, 'id');
         } elseif ($allTrees instanceof Collection) {
             $allNodes = array_column($allTrees->toArray(), null, 'id');
         } else {
@@ -140,10 +134,7 @@ trait TreeModel
         $use_static = false;
         if (is_null($allTrees)) {
             $allTrees = static::get(['id', $this->key_name, $this->key_parent]);
-            $allNodes = [];
-            foreach ($allTrees as $node) {
-                $allNodes[$node->id] = $node;
-            }
+            $allNodes = array_column($allTrees->toArray(), null, 'id');
             $use_static = true;
         } elseif ($allTrees instanceof Collection) {
             $allNodes = array_column($allTrees->toArray(), null, 'id');
@@ -151,11 +142,11 @@ trait TreeModel
             $allNodes = $allTrees;
         }
         $node = $allNodes[$this->id];
-        while ($node[$this->key_parent] != 0 && $node[$this->key_parent] != $node->id) {
+        while ($node[$this->key_parent] != 0 && $node[$this->key_parent] != $node['id']) {
             $node = $allNodes[$node[$this->key_parent]];
         }
-        return $use_static ? (static::find($node->id)) : (($allTrees instanceof Collection) ? $allTrees->where('id', $node->id)->first() :
-            $allTrees[$node->id]);
+        return $use_static ? (static::find($node['id'])) : (($allTrees instanceof Collection) ? $allTrees->where('id', $node['id'])->first() :
+            $allTrees[$node['id']]);
     }
 
     /**
@@ -239,6 +230,12 @@ trait TreeModel
     public static function getAll()
     {
         return self::getAllInfoToRedis(self::RedisKey_All());
+    }
+
+    public static function getAllArray()
+    {
+        return array_column(self::getAllInfoToRedis(self::RedisKey_All())
+            ->toArray(), null, 'id');
     }
 
     public static function getAllInfoToRedis($keyName, $relations = [], $relation_keys = [], $withCounts = [],
