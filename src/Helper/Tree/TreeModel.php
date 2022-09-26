@@ -194,10 +194,11 @@ trait TreeModel
         }
     }
 
-    public static function dealArrayTrees(array|null $allNodes = null, int $node_id = null)
+    public static function dealArrayTrees($allNodes = null, int $node_id = null,
+                                          $unsets = null)
     {
         $tmp = new static();
-        if (is_null($allNodes)) {
+        if (is_null($allNodes) || !is_array($allNodes)) {
             $allNodes = self::getAllArrayInfoToRedis(self::RedisKey_All());
         }
         foreach ($allNodes as $key => $node) {
@@ -205,13 +206,19 @@ trait TreeModel
         }
         $done = [];
         do {
-            $leafs = Arr::where($allNodes, function ($item) use ($allNodes, $tmp, $done) {
+            $leafs = Arr::where($allNodes, function ($item) use ($allNodes, $tmp, $done, $unsets) {
                 return !in_array($item['id'], Arr::pluck($allNodes, $tmp->key_parent)) &&
                     !in_array($item['id'], $done);
             });
-            foreach ($leafs as $leaf) {
+            foreach ($leafs as $key => $leaf) {
                 if ($leaf[$tmp->key_parent] != 0 && $leaf[$tmp->key_parent] != $leaf['id']) {
-                    $allNodes[$leaf[$tmp->key_parent]]['children'][] = $leaf;
+                    $parent_id = $leaf[$tmp->key_parent];
+                    if ($unsets) {
+                        foreach ($unsets as $unset) {
+                            unset($leaf[$unset]);
+                        }
+                    }
+                    $allNodes[$parent_id]['children'][] = $leaf;
                     unset($allNodes[$leaf['id']]);
                 }
                 $done[] = $leaf['id'];
