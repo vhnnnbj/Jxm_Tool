@@ -194,8 +194,7 @@ trait TreeModel
         }
     }
 
-    public static function dealArrayTrees($allNodes = null, int $node_id = null,
-                                          $unsets = null)
+    public static function dealArrayTrees($allNodes = null, $unsets = null)
     {
         $tmp = new static();
         if (is_null($allNodes) || !is_array($allNodes)) {
@@ -211,7 +210,8 @@ trait TreeModel
                     !in_array($item['id'], $done);
             });
             foreach ($leafs as $key => $leaf) {
-                if ($leaf[$tmp->key_parent] != 0 && $leaf[$tmp->key_parent] != $leaf['id']) {
+                if ($leaf[$tmp->key_parent] != 0 && $leaf[$tmp->key_parent] != $leaf['id']
+                    && isset($allNodes[$tmp->key_parent])) {
                     $parent_id = $leaf[$tmp->key_parent];
                     if ($unsets) {
                         foreach ($unsets as $unset) {
