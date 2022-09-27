@@ -211,7 +211,7 @@ trait TreeModel
             });
             foreach ($leafs as $key => $leaf) {
                 if ($leaf[$tmp->key_parent] != 0 && $leaf[$tmp->key_parent] != $leaf['id']
-                    && isset($allNodes[$tmp->key_parent])) {
+                    && isset($allNodes[$leaf[$tmp->key_parent]])) {
                     $parent_id = $leaf[$tmp->key_parent];
                     if ($unsets) {
                         foreach ($unsets as $unset) {
