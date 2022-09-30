@@ -196,9 +196,9 @@ function hideIdentity(string $identity)
  * @param string $phone
  * @return string
  */
-function hidePhoneNumber(string $phone)
+function hidePhoneNumber($phone)
 {
-    if (strlen($phone) > 7)
+    if (is_string($phone) && strlen($phone) > 7)
         return Str::substr($phone, 0, 3) . '****' . Str::substr($phone, Str::length($phone) - 4);
     else
         return $phone;
@@ -212,14 +212,14 @@ function hidePhoneNumber(string $phone)
  * @param string $wxid
  * @return string
  */
-function hideWxid(string $wxid, $check = false)
+function hideWxid($wxid, $check = false)
 {
     if ($check && !preg_match('/^[-_a-zA-Z0-9]{6,20}$/', $wxid)) {
         return '微信号格式错误:' . $wxid;
     }
-    if (strlen($wxid) > 5)
+    if (is_string($wxid) && strlen($wxid) > 5)
         return substr($wxid, 0, 2) . '****' . substr($wxid, strlen($wxid) - 3);
-    elseif (strlen($wxid) > 2)
+    elseif (is_string($wxid) && strlen($wxid) > 2)
         return substr('*****', 0, strlen($wxid) - 2) . substr($wxid, strlen($wxid) - 2);
     else
         return $wxid;
