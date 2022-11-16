@@ -88,7 +88,7 @@ trait TreeModel
         $allIds = [$model_id];
         do {
             $newAllIds = $allIds;
-            $subDepartments = Arr::pluck(Arr::where($allNodes, function ($q) use ($allIds) {
+            $subDepartments = Arr::pluck(Arr::where($allNodes, function ($q) use ($allIds, $tmp) {
                 return in_array($q[$tmp->key_parent], $allIds);
             }), 'id');
             $allIds = array_unique(array_merge($newAllIds, $subDepartments));
