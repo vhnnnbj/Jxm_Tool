@@ -76,9 +76,24 @@ trait TreeModel
      */
     public static function getAllSubIds($model_id, $allTrees = null)
     {
-        $model = static::whereId($model_id)->first();
-        if (!$model) return [];
-        return $model->getAllChildrenIds($allTrees);
+        $tmp = new self();
+        if (is_null($allTrees)) {
+            $allTrees = static::get(['id', $tmp->key_parent]);
+            $allNodes = array_column($allTrees->toArray(), null, 'id');
+        } elseif ($allTrees instanceof Collection) {
+            $allNodes = array_column($allTrees->toArray(), null, 'id');
+        } else {
+            $allNodes = $allTrees;
+        }
+        $allIds = [$model_id];
+        do {
+            $newAllIds = $allIds;
+            $subDepartments = Arr::pluck(Arr::where($allNodes, function ($q) use ($allIds) {
+                return in_array($q[$tmp->key_parent], $allIds);
+            }), 'id');
+            $allIds = array_unique(array_merge($newAllIds, $subDepartments));
+        } while (sizeof($newAllIds) != sizeof($allIds));
+        return $allIds;
     }
 
     /**
@@ -117,9 +132,23 @@ trait TreeModel
      */
     public static function getAllUpGrades($model_id, $allTrees = null)
     {
-        $model = static::whereId($model_id)->first();
-        if (!$model) return [];
-        return $model->getUpGrades($allTrees);
+        $tmp = new static();
+        if (is_null($allTrees)) {
+            $allTrees = static::get(['id', $tmp->key_parent]);
+            $allNodes = array_column($allTrees->toArray(), null, 'id');
+        } elseif ($allTrees instanceof Collection) {
+            $allNodes = array_column($allTrees->toArray(), null, 'id');
+        } else {
+            $allNodes = $allTrees;
+        }
+        $allIds = [];
+        $node = $allNodes[$model_id];
+        $allIds[] = $model_id;
+        while ($node[$tmp->key_parent] != 0 && $node[$tmp->key_parent] != $node['id']) {
+            $node = $allNodes[$node[$tmp->key_parent]];
+            $allIds[] = $node['id'];
+        }
+        return $allIds;
     }
 
     /**
